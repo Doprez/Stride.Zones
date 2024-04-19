@@ -1,0 +1,11 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 16
+VisualStudioVersion = 16.0.0.0
+MinimumVisualStudioVersion = 16.0.0.0
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stride.Zones.Demo.Windows", "Stride.Zones.Demo.Windows\Stride.Zones.Demo.Windows.csproj", "{369A2469-373D-45E0-955F-F5193FD4AAA6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stride.Zones.Demo", "Stride.Zones.Demo\Stride.Zones.Demo.csproj", "{F1606182-8BD4-4874-93CC-10294A1EFFF1}"
+EndProject
+Global
+EndGlobal
