@@ -101,6 +101,14 @@ public class ZoneProcessor : EntityProcessor<ZoneComponent, ZoneRenderData>, IEn
 			var key = component.Key;
 			var data = component.Value;
 
+			// Hide mesh when ShowDebugMesh is disabled
+			if (!key.ShowDebugMesh)
+			{
+				DestroyMesh(data);
+				key.IsDirty = true; // Keep dirty so toggling back on triggers rebuild
+				continue;
+			}
+
 			// At least 3 nodes are needed to make a convex mesh
 			if (key.BoundaryNodes.Count < 3 || key.BoundaryNodes.Contains(null))
 			{
@@ -123,6 +131,7 @@ public class ZoneProcessor : EntityProcessor<ZoneComponent, ZoneRenderData>, IEn
 						data.ModelComponent.Materials[0] = key.Material;
 					}
 				}
+
 				data.ModelComponent.Model.Meshes[0] = data.Mesh;
 				key.Entity.Add(data.ModelComponent);
 

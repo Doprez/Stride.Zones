@@ -28,7 +28,7 @@ Hierarchy:
                         Type: !LightDirectional
                             Color: !ColorRgbProvider
                                 Value: {R: 1.0, G: 1.0, B: 1.0}
-                            Shadow: !LightDirectionalShadowMap
+                            Shadow:
                                 Enabled: true
                                 Filter: !LightShadowMapFilterTypePcf
                                     FilterSize: Filter5x5
@@ -44,7 +44,7 @@ Hierarchy:
                 Components:
                     ab581355a6098ec59acc1bd2dc147ab8: !TransformComponent
                         Id: bd36e80d-bbb2-45d8-9d52-9088860ddda2
-                        Position: {X: 10.346262, Y: 0.0, Z: 8.4823675}
+                        Position: {X: 8.327881, Y: 0.0, Z: 12.079011}
                         Rotation: {X: 0.0, Y: 0.0, Z: 0.0, W: 1.0}
                         Scale: {X: 1.0, Y: 1.0, Z: 1.0}
                         Children: {}
@@ -68,7 +68,7 @@ Hierarchy:
                 Components:
                     4d503163c32a4b4269911ac394da95f4: !TransformComponent
                         Id: 207b31b3-809d-49d4-b606-193387b083ff
-                        Position: {X: -3.6767445, Y: 0.0, Z: -18.39673}
+                        Position: {X: 4.428096, Y: 0.0, Z: -19.032145}
                         Rotation: {X: 0.0, Y: 0.0, Z: 0.0, W: 1.0}
                         Scale: {X: 1.0, Y: 1.0, Z: 1.0}
                         Children: {}
@@ -104,6 +104,7 @@ Hierarchy:
                             bbb698c3abfc4561d8be9f9fed977d99: ref!! 207b31b3-809d-49d4-b606-193387b083ff
                     90e52949cd8e012dec89f9acbc92e549: !ZoneComponent
                         Id: ac558f32-5214-48ca-9ba3-96bfa3a4ed18
+                        ShowDebugMesh: true
                         Material: 588c51d2-9101-49f1-9447-8fc9b72e2204:Material
                         BoundaryNodes:
                             456a9b39bc959e6884d26eb7a6a5d66a: ref!! 1907c9ca-b403-4483-b7f1-599921af7d0f
@@ -111,7 +112,7 @@ Hierarchy:
                             c583ec0f3a15411db0be732110bd44d7: ref!! bd36e80d-bbb2-45d8-9d52-9088860ddda2
                             39ab6fd72f064ccbb17af42ad67b31bd: ref!! 70998dfc-5305-4dd2-a131-1292299d8fc7
                             e548969df2989992b7bcddfec02d4cf3: ref!! 9ba6902e-a86e-46cb-80aa-9ad99dae44ef
-                            fae5516552b9afe231056cfa276f1ee3: ref!! 207b31b3-809d-49d4-b606-193387b083ff
+                            e5978673c83dbee58ac45892e7450970: ref!! 207b31b3-809d-49d4-b606-193387b083ff
                         BoundaryHeight: 5.0
         -   Entity:
                 Id: 76187d27-52b4-413f-888c-d3d39598dd01
@@ -190,7 +191,7 @@ Hierarchy:
                 Components:
                     bef86da70eb7855fd88784f1671ce247: !TransformComponent
                         Id: 1907c9ca-b403-4483-b7f1-599921af7d0f
-                        Position: {X: 14.37178, Y: 0.0, Z: -17.819296}
+                        Position: {X: 18.366785, Y: 0.0, Z: -13.360388}
                         Rotation: {X: 0.0, Y: 0.0, Z: 0.0, W: 1.0}
                         Scale: {X: 1.0, Y: 1.0, Z: 1.0}
                         Children: {}

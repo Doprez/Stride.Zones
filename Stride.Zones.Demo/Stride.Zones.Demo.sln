@@ -1,3 +1,4 @@
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34622.214
@@ -5,6 +6,8 @@ MinimumVisualStudioVersion = 16.0.0.0
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Stride.Zones.Demo.Windows", "Stride.Zones.Demo.Windows\Stride.Zones.Demo.Windows.csproj", "{369A2469-373D-45E0-955F-F5193FD4AAA6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Stride.Zones.Demo", "Stride.Zones.Demo\Stride.Zones.Demo.csproj", "{F1606182-8BD4-4874-93CC-10294A1EFFF1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doprez.Stride.Zones", "Doprez.Stride.Zones\Doprez.Stride.Zones.csproj", "{4AB65E78-327E-4C6D-81CD-1EEA490EC970}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

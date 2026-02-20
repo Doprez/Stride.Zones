@@ -1,5 +1,6 @@
 ﻿using Stride.Core.Collections;
 using Stride.Core;
+using Stride.Core.Mathematics;
 using Stride.Engine.Design;
 using Stride.Engine;
 using System;
@@ -19,6 +20,17 @@ public class ZoneComponent : EntityComponent
 	[DataMemberIgnore]
 	public bool IsDirty { get; set; } = true;
 
+	public bool ShowDebugMesh
+	{
+		get => _showDebugMesh;
+		set
+		{
+			_showDebugMesh = value;
+			IsDirty = true;
+		}
+	}
+	private bool _showDebugMesh = true;
+
 	public Material Material
 	{
 		get
@@ -33,7 +45,24 @@ public class ZoneComponent : EntityComponent
 	}
 	private Material _material;
 
-	public FastTrackingCollection<TransformComponent> BoundaryNodes { get; set; } = new();
+	public FastTrackingCollection<TransformComponent> BoundaryNodes
+	{
+		get => _boundaryNodes;
+		set
+		{
+			if (_boundaryNodes != null)
+			{
+				_boundaryNodes.CollectionChanged -= BoundaryNodesChanged;
+			}
+			_boundaryNodes = value;
+			if (_boundaryNodes != null)
+			{
+				_boundaryNodes.CollectionChanged += BoundaryNodesChanged;
+			}
+			IsDirty = true;
+		}
+	}
+	private FastTrackingCollection<TransformComponent> _boundaryNodes = new();
 
 	public float BoundaryHeight
 	{
@@ -51,7 +80,7 @@ public class ZoneComponent : EntityComponent
 
 	public ZoneComponent()
 	{
-		BoundaryNodes.CollectionChanged += BoundaryNodesChanged;
+		_boundaryNodes.CollectionChanged += BoundaryNodesChanged;
 	}
 
 	private void BoundaryNodesChanged(object sender, ref FastTrackingCollectionChangedEventArgs e)
