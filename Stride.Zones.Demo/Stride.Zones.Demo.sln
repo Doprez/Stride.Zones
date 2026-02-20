@@ -1,11 +1,27 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 16
-VisualStudioVersion = 16.0.0.0
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34622.214
 MinimumVisualStudioVersion = 16.0.0.0
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stride.Zones.Demo.Windows", "Stride.Zones.Demo.Windows\Stride.Zones.Demo.Windows.csproj", "{369A2469-373D-45E0-955F-F5193FD4AAA6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Stride.Zones.Demo.Windows", "Stride.Zones.Demo.Windows\Stride.Zones.Demo.Windows.csproj", "{369A2469-373D-45E0-955F-F5193FD4AAA6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stride.Zones.Demo", "Stride.Zones.Demo\Stride.Zones.Demo.csproj", "{F1606182-8BD4-4874-93CC-10294A1EFFF1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Stride.Zones.Demo", "Stride.Zones.Demo\Stride.Zones.Demo.csproj", "{F1606182-8BD4-4874-93CC-10294A1EFFF1}"
 EndProject
 Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{369A2469-373D-45E0-955F-F5193FD4AAA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{369A2469-373D-45E0-955F-F5193FD4AAA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{369A2469-373D-45E0-955F-F5193FD4AAA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{369A2469-373D-45E0-955F-F5193FD4AAA6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1606182-8BD4-4874-93CC-10294A1EFFF1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1606182-8BD4-4874-93CC-10294A1EFFF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1606182-8BD4-4874-93CC-10294A1EFFF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1606182-8BD4-4874-93CC-10294A1EFFF1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
 EndGlobal

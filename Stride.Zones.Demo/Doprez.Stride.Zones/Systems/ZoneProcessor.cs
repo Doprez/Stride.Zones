@@ -34,9 +34,16 @@ public class ZoneProcessor : EntityProcessor<ZoneComponent, ZoneRenderData>, IEn
 		foreach (var component in ComponentDatas)
 		{
 			var key = component.Key;
+			var points = key.BoundaryNodes.Select(x => x.Position).ToArray();
 
-			// I'll change this later to be more efficient.
-			if (CheckCollisionTopDown(key.BoundaryNodes.Select(x => x.Position).ToArray(), Position))
+			// Check Y bounds
+			float minY = points.Min(p => p.Y);
+			float maxY = points.Max(p => p.Y) + key.BoundaryHeight;
+			if (Position.Y < minY || Position.Y > maxY)
+				continue;
+
+			// Ray casting algorithm handles concave shapes correctly
+			if (CheckCollisionTopDown(points, Position))
 			{
 				return key;
 			}
@@ -142,98 +149,208 @@ public class ZoneProcessor : EntityProcessor<ZoneComponent, ZoneRenderData>, IEn
 		_meshBuilder.WithPrimitiveType(PrimitiveType.TriangleList);
 		_meshBuilder.WithIndexType(IndexingType.Int16);
 
-		var position = _meshBuilder.WithPosition<Vector3>();
+		var posAttr = _meshBuilder.WithPosition<Vector3>();
+		var normAttr = _meshBuilder.WithNormal<Vector3>();
 
-		var organizedNodes = GetOrganizedNodes(component);
-		var nodes = organizedNodes.ToArray();
-		var boundingBox = BoundingBox.FromPoints(nodes);
-		var boundingSphere = BoundingSphere.FromPoints(nodes);
+		int nodeCount = component.BoundaryNodes.Count;
+		var bottomPos = new Vector3[nodeCount];
+		var topPos = new Vector3[nodeCount];
 
-		for (int i = 0; i < nodes.Length; i++)
+		for (int i = 0; i < nodeCount; i++)
+		{
+			bottomPos[i] = component.BoundaryNodes[i].Position;
+			topPos[i] = bottomPos[i];
+			topPos[i].Y += component.BoundaryHeight;
+		}
+
+		// Ensure consistent winding for outward side normals and upward top cap normals
+		if (SignedAreaXZ(bottomPos) < 0)
+		{
+			Array.Reverse(bottomPos);
+			Array.Reverse(topPos);
+		}
+
+		var allPos = new Vector3[nodeCount * 2];
+		Array.Copy(bottomPos, 0, allPos, 0, nodeCount);
+		Array.Copy(topPos, 0, allPos, nodeCount, nodeCount);
+		var boundingBox = BoundingBox.FromPoints(allPos);
+		var boundingSphere = BoundingSphere.FromPoints(allPos);
+
+		int vertIdx = 0;
+
+		// Side walls - separate vertices per quad for flat shading normals
+		for (int i = 0; i < nodeCount; i++)
+		{
+			int next = (i + 1) % nodeCount;
+
+			var b0 = bottomPos[i];
+			var b1 = bottomPos[next];
+			var t0 = topPos[i];
+			var t1 = topPos[next];
+
+			var faceNormal = Vector3.Cross(t0 - b0, b1 - b0);
+			if (faceNormal.LengthSquared() > 0)
+				faceNormal.Normalize();
+
+			int v0 = vertIdx++;
+			_meshBuilder.AddVertex();
+			_meshBuilder.SetElement(posAttr, b0);
+			_meshBuilder.SetElement(normAttr, faceNormal);
+
+			int v1 = vertIdx++;
+			_meshBuilder.AddVertex();
+			_meshBuilder.SetElement(posAttr, b1);
+			_meshBuilder.SetElement(normAttr, faceNormal);
+
+			int v2 = vertIdx++;
+			_meshBuilder.AddVertex();
+			_meshBuilder.SetElement(posAttr, t0);
+			_meshBuilder.SetElement(normAttr, faceNormal);
+
+			int v3 = vertIdx++;
+			_meshBuilder.AddVertex();
+			_meshBuilder.SetElement(posAttr, t1);
+			_meshBuilder.SetElement(normAttr, faceNormal);
+
+			// Triangle 1: b0, b1, t0
+			_meshBuilder.AddIndex(v0);
+			_meshBuilder.AddIndex(v1);
+			_meshBuilder.AddIndex(v2);
+
+			// Triangle 2: b1, t1, t0
+			_meshBuilder.AddIndex(v1);
+			_meshBuilder.AddIndex(v3);
+			_meshBuilder.AddIndex(v2);
+		}
+
+		// Top cap - ear clipping triangulation for correct concave rendering
+		var topNormal = Vector3.UnitY;
+		int topStart = vertIdx;
+
+		for (int i = 0; i < nodeCount; i++)
 		{
 			_meshBuilder.AddVertex();
-			_meshBuilder.SetElement(position, nodes[i]);
+			_meshBuilder.SetElement(posAttr, topPos[i]);
+			_meshBuilder.SetElement(normAttr, topNormal);
+			vertIdx++;
 		}
 
-		// Add the first node again to close the mesh
-		_meshBuilder.AddVertex();
-		_meshBuilder.SetElement(position, nodes[0]);
-
-		// I hate this... but it works
-		for (int i = 0; i < nodes.Length; i++)
+		var topIndices = EarClipTriangulate(topPos);
+		for (int i = 0; i < topIndices.Count; i += 3)
 		{
-			// This might be simpler if I were to organize the nodes differently
-			// but I don't want to do that right now.
-			if (i % 2 == 0)
-			{
-				_meshBuilder.AddIndex(i);
-				if (i + 2 <= nodes.Length)
-				{
-					_meshBuilder.AddIndex(i + 2);
-				}
-				else
-				{
-					_meshBuilder.AddIndex(1);
-				}
-				_meshBuilder.AddIndex(i + 1);
-			}
-			else
-			{
-				_meshBuilder.AddIndex(i);
-				_meshBuilder.AddIndex(i + 1);
-				if (i + 2 <= nodes.Length)
-				{
-					_meshBuilder.AddIndex(i + 2);
-				}
-				else
-				{
-					_meshBuilder.AddIndex(1);
-				}
-			}
+			_meshBuilder.AddIndex(topStart + topIndices[i]);
+			_meshBuilder.AddIndex(topStart + topIndices[i + 1]);
+			_meshBuilder.AddIndex(topStart + topIndices[i + 2]);
 		}
 
-		//top nodes are the odd indices ie 0 bottom, 1 top, 2 bottom, 3 top...
-		// create top indices for the top of the mesh
-		for (int i = 0; i < nodes.Length; i += 2)
-		{
-			//always add the first top node to close the mesh
-			_meshBuilder.AddIndex(1);
-			_meshBuilder.AddIndex(i + 1);
-			if (i + 3 <= nodes.Length)
-			{
-				_meshBuilder.AddIndex(i + 3);
-			}
-			else
-			{
-				_meshBuilder.AddIndex(1);
-			}
-		}
-
-		var mesh = _meshBuilder.ToMeshDraw(_graphicsDevice);
-
+		var meshDraw = _meshBuilder.ToMeshDraw(_graphicsDevice);
 		_meshBuilder?.Dispose();
 
 		return new Mesh
 		{
-			Draw = mesh,
+			Draw = meshDraw,
 			BoundingBox = boundingBox,
 			BoundingSphere = boundingSphere,
 		};
 	}
 
-	private List<Vector3> GetOrganizedNodes(ZoneComponent component)
+	/// <summary>
+	/// Computes the signed area of a polygon projected onto the XZ plane.
+	/// Positive means the vertices need to be reversed for outward-facing normals.
+	/// </summary>
+	private static float SignedAreaXZ(Vector3[] polygon)
 	{
-		var organizedNodes = new List<Vector3>();
-
-		for (int i = 0; i < component.BoundaryNodes.Count; i++)
+		float area = 0;
+		for (int i = 0; i < polygon.Length; i++)
 		{
-			organizedNodes.Add(component.BoundaryNodes[i].Position);
-			var node = component.BoundaryNodes[i].Position;
-			node.Y += component.BoundaryHeight;
-			organizedNodes.Add(node);
+			int next = (i + 1) % polygon.Length;
+			area += polygon[i].X * polygon[next].Z - polygon[next].X * polygon[i].Z;
+		}
+		return area;
+	}
+
+	/// <summary>
+	/// Triangulates a concave or convex polygon using the ear clipping algorithm projected onto the XZ plane.
+	/// </summary>
+	private static List<int> EarClipTriangulate(Vector3[] polygon)
+	{
+		var result = new List<int>();
+		int n = polygon.Length;
+		if (n < 3) return result;
+
+		var remaining = new List<int>(n);
+		for (int i = 0; i < n; i++)
+			remaining.Add(i);
+
+		int maxAttempts = n * n;
+		int current = 0;
+
+		while (remaining.Count > 2 && maxAttempts-- > 0)
+		{
+			int count = remaining.Count;
+			int prev = (current - 1 + count) % count;
+			int next = (current + 1) % count;
+
+			var a = polygon[remaining[prev]];
+			var b = polygon[remaining[current]];
+			var c = polygon[remaining[next]];
+
+			if (IsConvexXZ(a, b, c) && IsEar(polygon, remaining, prev, current, next))
+			{
+				result.Add(remaining[prev]);
+				result.Add(remaining[current]);
+				result.Add(remaining[next]);
+				remaining.RemoveAt(current);
+				if (current >= remaining.Count)
+					current = 0;
+			}
+			else
+			{
+				current = (current + 1) % remaining.Count;
+			}
 		}
 
-		return organizedNodes;
+		return result;
+	}
+
+	private static bool IsConvexXZ(Vector3 a, Vector3 b, Vector3 c)
+	{
+		float cross = (b.Z - a.Z) * (c.X - b.X) - (b.X - a.X) * (c.Z - b.Z);
+		return cross < 0;
+	}
+
+	private static bool IsEar(Vector3[] polygon, List<int> remaining, int prevIdx, int currIdx, int nextIdx)
+	{
+		var a = polygon[remaining[prevIdx]];
+		var b = polygon[remaining[currIdx]];
+		var c = polygon[remaining[nextIdx]];
+
+		for (int i = 0; i < remaining.Count; i++)
+		{
+			if (i == prevIdx || i == currIdx || i == nextIdx) continue;
+
+			if (IsPointInTriangleXZ(polygon[remaining[i]], a, b, c))
+				return false;
+		}
+
+		return true;
+	}
+
+	private static bool IsPointInTriangleXZ(Vector3 p, Vector3 a, Vector3 b, Vector3 c)
+	{
+		float d1 = CrossXZ(a, b, p);
+		float d2 = CrossXZ(b, c, p);
+		float d3 = CrossXZ(c, a, p);
+
+		bool hasNeg = (d1 < 0) || (d2 < 0) || (d3 < 0);
+		bool hasPos = (d1 > 0) || (d2 > 0) || (d3 > 0);
+
+		return !(hasNeg && hasPos);
+	}
+
+	private static float CrossXZ(Vector3 a, Vector3 b, Vector3 p)
+	{
+		return (b.X - a.X) * (p.Z - a.Z) - (b.Z - a.Z) * (p.X - a.X);
 	}
 
 	protected override ZoneRenderData GenerateComponentData([NotNull] Entity entity, [NotNull] ZoneComponent component)
