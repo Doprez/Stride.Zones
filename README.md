@@ -1,6 +1,6 @@
 This project contains tools to be able to define zones within the scene using a set of nodes and see if a Vector3 position collides with it on the X and Z plane.
 
-![image](https://github.com/Doprez/Stride.Zones/assets/73259914/c36398b1-29b5-42f6-a891-06d35f518ae8)
+<img width="1919" height="1029" alt="{DA3A6ABA-8381-46B7-B76B-B164B58F9D43}" src="https://github.com/user-attachments/assets/f9d04ef9-4b61-4da3-922f-2c6db3c628ba" />
 
 Demo:
 
